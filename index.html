@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Animator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="stage">
+    <img id="ref" alt="" hidden>
+    <canvas id="onion"></canvas>
+    <canvas id="draw"></canvas>
+  </div>
+
+  <div id="bar">
+    <div class="row">
+      <button id="prev">&lt;</button>
+      <span id="label"></span>
+      <button id="next">&gt;</button>
+      <button id="add">+ Frame</button>
+      <button id="del">Del</button>
+      <button id="play">Play</button>
+    </div>
+    <div class="row">
+      <label class="btn">Ref image<input type="file" id="refFile" accept="image/*"></label>
+      <input type="range" id="refAlpha" min="0.05" max="1" step="0.05" value="0.4" title="Reference opacity">
+      <button id="onionBtn">Onion</button>
+      <button id="undo">Undo</button>
+      <button id="clear">Clear</button>
+    </div>
+    <div class="row">
+      <input type="color" id="color" value="#000000">
+      <input type="range" id="size" min="2" max="30" value="6" title="Brush size">
+      <label>FPS <input type="number" id="fps" min="1" max="60" value="12"></label>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
