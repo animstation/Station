@@ -87,8 +87,6 @@ h1 {
 #onion { opacity: .25; pointer-events: none; }
 #draw { touch-action: none; cursor: crosshair; }
 
-#bar { display: grid; gap: 8px; padding: 10px 12px 12px; background: var(--panel); border-radius: 22px 22px 0 0; }
-.active #bar { animation: up .5s var(--ease) both; }
 @keyframes up { from { transform: translateY(40px); opacity: 0; } }
 .row { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .tools { justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
@@ -96,15 +94,6 @@ h1 {
 #label { min-width: 64px; text-align: center; font-weight: 600; }
 .bump { animation: bump .25s var(--ease); }
 @keyframes bump { 50% { transform: scale(1.25); } }
-
-#dots { display: flex; gap: 8px; padding: 4px; overflow-x: auto; scrollbar-width: none; }
-#dots i {
-  flex: none; width: 10px; height: 10px; border-radius: 50%; background: #3a3a55; cursor: pointer;
-  transition: transform .2s var(--ease), background .2s;
-}
-#dots i:first-child { margin-left: auto; }
-#dots i:last-child { margin-right: auto; }
-#dots i.on { background: linear-gradient(135deg, var(--a), var(--b)); transform: scale(1.5); }
 
 #play.playing { animation: pulse 1s infinite; }
 @keyframes pulse { 50% { box-shadow: 0 0 0 8px #ec489922; } }
