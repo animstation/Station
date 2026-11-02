@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#0e0e16">
   <title>Animator</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="editor.css">
 </head>
 <body>
   <section id="home" class="view active">
@@ -17,37 +18,78 @@
     <header class="top">
       <button id="back" class="icon" aria-label="Back">‹</button>
       <input id="name" maxlength="40" aria-label="Project name">
+      <button id="undo">Undo</button>
       <button id="play" class="primary">Play</button>
     </header>
 
-    <div id="stageWrap">
-      <div id="stage">
-        <img id="ref" alt="" hidden>
-        <canvas id="onion"></canvas>
-        <canvas id="draw"></canvas>
+    <div id="work">
+      <div id="stageWrap">
+        <div id="stage">
+          <img id="ref" alt="" hidden>
+          <canvas id="onion"></canvas>
+          <canvas id="draw"></canvas>
+          <canvas id="fx"></canvas>
+        </div>
       </div>
-    </div>
 
-    <nav id="bar">
-      <div id="dots"></div>
-      <div class="row">
-        <button id="prev" class="icon" aria-label="Previous frame">‹</button>
-        <span id="label"></span>
-        <button id="next" class="icon" aria-label="Next frame">›</button>
-        <button id="add">+ Frame</button>
-        <button id="del">Delete</button>
-      </div>
-      <div class="row tools">
-        <input type="color" id="color" value="#000000" aria-label="Color">
-        <input type="range" id="size" min="2" max="30" value="6" aria-label="Brush size">
-        <label class="btn">Ref image<input type="file" id="refFile" accept="image/*"></label>
-        <input type="range" id="refAlpha" min="0.05" max="1" step="0.05" value="0.4" aria-label="Reference opacity">
-        <button id="onionBtn" class="on">Onion</button>
-        <button id="undo">Undo</button>
-        <button id="clear">Clear</button>
-        <label class="fps">FPS<input type="number" id="fps" min="1" max="60" value="12"></label>
-      </div>
-    </nav>
+      <aside id="dock">
+        <nav id="tabs">
+          <button data-p="frames" class="on">Frames</button>
+          <button data-p="layers">Layers</button>
+          <button data-p="tools">Tools</button>
+          <button data-p="fx">Shaders</button>
+        </nav>
+
+        <div id="panels">
+          <div class="panel on" id="p-frames">
+            <div id="strip"></div>
+            <div class="row tools">
+              <button id="prev" class="icon" aria-label="Previous frame">‹</button>
+              <span id="label"></span>
+              <button id="next" class="icon" aria-label="Next frame">›</button>
+              <button id="add">+ Frame</button>
+              <button id="dup">Copy</button>
+              <button id="del">Delete</button>
+              <button id="clear">Clear</button>
+              <button id="onionBtn" class="on">Onion</button>
+              <label class="fps">FPS<input type="number" id="fps" min="1" max="60" value="12"></label>
+            </div>
+          </div>
+
+          <div class="panel" id="p-layers">
+            <div id="layerList"></div>
+            <div class="row tools">
+              <button id="addL">+ Layer</button>
+              <button id="addF">+ Fill layer</button>
+              <button id="lUp">Up</button>
+              <button id="lDn">Down</button>
+              <button id="lDel">Delete</button>
+            </div>
+          </div>
+
+          <div class="panel" id="p-tools">
+            <div class="row tools">
+              <button id="tBrush" class="on">Brush</button>
+              <button id="tSwap">Color swap</button>
+              <input type="color" id="color" value="#000000" aria-label="Color">
+              <input type="range" id="size" min="2" max="30" value="6" aria-label="Brush size">
+            </div>
+            <div id="swatches"></div>
+            <div class="row tools">
+              <label class="btn">Ref image<input type="file" id="refFile" accept="image/*"></label>
+              <input type="range" id="refAlpha" min="0.05" max="1" step="0.05" value="0.4" aria-label="Reference opacity">
+            </div>
+            <small id="hint"></small>
+          </div>
+
+          <div class="panel" id="p-fx">
+            <div class="row tools" id="fxList"></div>
+            <label class="fps">Intensity<input type="range" id="fxK" min="0" max="1" step="0.05" value="0.5"></label>
+            <small id="fxHint">Shaders preview the final look. The reference image and onion skin are hidden while one is on.</small>
+          </div>
+        </div>
+      </aside>
+    </div>
   </section>
 
   <script src="app.js"></script>
