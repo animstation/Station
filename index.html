@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
   <title>Animator</title>
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <div id="bg"></div>
@@ -21,6 +21,9 @@
       <input id="name" maxlength="40" aria-label="Project name">
       <button id="undo">Undo</button>
       <button id="play" class="primary">Play</button>
+      <button id="uiMenu">Tools</button>
+      <button id="uiTime">Frames</button>
+      <button id="uiFocus">Focus</button>
     </header>
 
     <div id="work">
@@ -28,7 +31,8 @@
         <nav id="tabs">
           <button data-p="tools" class="on">Tools</button>
           <button data-p="layers">Layers</button>
-          <button data-p="fx">Shaders</button>
+          <button data-p="fx">FX</button>
+          <button data-p="video">Video</button>
           <button data-p="project">Project</button>
         </nav>
 
@@ -77,6 +81,16 @@
             <small>Shaders preview the final look. The reference image and onion skin are hidden while one is on.</small>
           </div>
 
+          <div class="panel" id="p-video">
+            <label class="btn">Add video<input type="file" id="vidFile" accept="video/*"></label>
+            <label class="fps">Opacity<input type="range" id="vidAlpha" min="0.05" max="1" step="0.05" value="0.6"></label>
+            <label class="fps">Offset (s)<input type="number" id="vidOff" step="0.1" value="0"></label>
+            <button id="vidFrames">Make frames from video</button>
+            <label class="fps"><input type="checkbox" id="vidExport"> Include video in export</label>
+            <button id="vidDel">Remove video</button>
+            <small>Step through frames to scrub the video, or press Play to run them together. The video is not saved with the project, so add it again after reloading.</small>
+          </div>
+
           <div class="panel" id="p-project">
             <div class="row">
               <label class="fps">Season<input type="number" id="season" min="1" max="99" value="1"></label>
@@ -98,12 +112,14 @@
       <div id="viewport">
         <div id="stage">
           <img id="ref" alt="" hidden>
+          <video id="vid" muted playsinline hidden></video>
           <canvas id="onion"></canvas>
           <canvas id="draw"></canvas>
           <canvas id="fx"></canvas>
           <canvas id="ui"></canvas>
         </div>
         <div id="tip"></div>
+        <button id="unfocus">Show UI</button>
         <div id="zoom">
           <button id="zOut" aria-label="Zoom out">−</button>
           <span id="zoomPct">100%</span>
@@ -141,6 +157,6 @@
   </div>
   <div id="toast"></div>
 
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
