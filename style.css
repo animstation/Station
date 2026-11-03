@@ -58,7 +58,7 @@ h1 {
   transition: transform .2s var(--ease), box-shadow .2s;
 }
 .card:hover { transform: translateY(-4px); background: var(--panel); box-shadow: 0 14px 32px #8b5cf633; }
-.card canvas { display: block; width: 100%; aspect-ratio: 720 / 1040; background: #fff; }
+.card canvas { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; background: #fff; }
 .meta { display: grid; padding: 10px 12px; }
 .meta b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .meta small { color: var(--mute); }
@@ -79,7 +79,7 @@ h1 {
 #stageWrap { flex: 1; min-height: 0; padding: 8px; display: grid; place-items: center; container-type: size; }
 #stage {
   position: relative; overflow: hidden; background: #fff; border-radius: 14px;
-  aspect-ratio: 720 / 1040; width: min(100cqw, 100cqh * 720 / 1040);
+  aspect-ratio: var(--ar, .6923); width: min(100cqw, 100cqh * var(--ar, .6923));
   box-shadow: 0 12px 40px #000a;
 }
 #stage > * { position: absolute; inset: 0; width: 100%; height: 100%; }
