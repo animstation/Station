@@ -10,7 +10,7 @@
 #tabs button { flex: 1; min-height: 40px; background: transparent; color: var(--mute); outline: 0; }
 #tabs button.on { background: var(--panel2); color: var(--text); }
 
-#panels { height: 184px; padding: 8px 12px 12px; overflow: hidden; transition: height .3s var(--ease), padding .3s; }
+#panels { height: 210px; padding: 8px 12px 12px; overflow: hidden; transition: height .3s var(--ease), padding .3s; }
 #dock.min #panels { height: 0; padding-top: 0; padding-bottom: 0; }
 .panel { display: none; gap: 8px; align-content: start; height: 100%; overflow-y: auto; }
 .panel.on { display: grid; animation: slide .25s var(--ease); }
@@ -41,8 +41,24 @@ small { color: var(--mute); font-size: 12px; }
 #swatches { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
 #swatches button { flex: none; width: 32px; min-height: 32px; padding: 0; border-radius: 50%; border: 2px solid #fff3; }
 
-@media (min-width: 900px) {
+@media (orientation: landscape) {
   #work { flex-direction: row; }
   #dock { width: 360px; border-radius: 22px 0 0 22px; }
   #panels, #dock.min #panels { height: auto; flex: 1; padding: 8px 12px 12px; }
 }
+
+/* image gizmo layer, rotation, small screens */
+#ui { pointer-events: none; }
+#tabs button { padding: 0 4px; font-size: 13px; }
+.view { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+@media (max-height: 520px) { .top { padding: 6px 12px; } #tabs button { min-height: 36px; } }
+
+/* gallery: seasons + episode tracker */
+.season { grid-column: 1 / -1; display: grid; gap: 6px; margin-top: 10px; }
+.season b { font-size: 18px; }
+.bar { height: 6px; border-radius: 3px; background: var(--panel2); overflow: hidden; }
+.bar i { display: block; height: 100%; background: linear-gradient(135deg, var(--a), var(--b)); transition: width .6s var(--ease); }
+.chip { width: fit-content; margin-top: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; background: #3a3a55; }
+.chip[data-s="In progress"] { background: #4c1d95; color: #ddd6fe; }
+.chip[data-s="Done"] { background: #14532d; color: #86efac; }
+select { min-height: 44px; padding: 0 10px; border: 0; border-radius: 12px; background: var(--panel2); color: var(--text); font: inherit; }
