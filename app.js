@@ -169,9 +169,13 @@ function newProject() {
 function openProject(p) {
   proj = p; cur = 0; fps = p.fps || 12; hist = []; sel = null; drag = null; clip = {};
   activeL = p.layers[p.layers.length - 1].id;
-  $('fps').value = fps; $('name').value = p.name; ref.hidden = true;
+  $('fps').value = fps; $('name').value = p.name; ref.hidden = true; resetVideo();
   $('season').value = p.season; $('episode').value = p.episode; $('status').value = p.status;
   $('exportOut').textContent = '';
+  const compact = isCompact();
+  ed.classList.toggle('noMenu', compact); ed.classList.toggle('noTime', compact); ed.classList.remove('focus');
+  syncUI();
+  if (compact) toast('Tap Tools or Frames to open the panels');
   applySize();
   show('editor');
   renderLayers(); refresh();
@@ -192,6 +196,11 @@ function paintFrame() {
     if (cur < proj.frames.length - 1) paint(octx, proj.frames[cur + 1], proj.layers, true, W, H, '#8a8a8a');
   }
   fxDirty = true;
+}
+
+function updateThumb(i) {
+  const b = $('strip').children[i];
+  if (b) b.firstChild.replaceWith(thumb(proj.frames[i], proj.layers, 54));
 }
 
 function renderStrip() {
@@ -216,7 +225,9 @@ function render() {
   label.classList.remove('bump'); void label.offsetWidth; label.classList.add('bump');
   const kids = $('strip').children;
   [...kids].forEach((b, i) => b.classList.toggle('on', i === cur));
-  if (kids[cur]) kids[cur].scrollIntoView({ inline: 'center', block: 'nearest' });
+  const sk = kids[cur], ss = $('strip');
+  if (sk && !ed.classList.contains('noTime')) ss.scrollLeft += sk.getBoundingClientRect().left - ss.getBoundingClientRect().left - (ss.clientWidth - sk.offsetWidth) / 2;
+  syncVideo();
   drawUI();
 }
 function refresh() { renderStrip(); render(); }
@@ -334,14 +345,25 @@ const rect = () => rectC || (rectC = draw.getBoundingClientRect());
 const schedule = fn => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; fn(); }); };   // one repaint per frame
 const tip = t => { $('tip').textContent = t || ''; };
 
-function applyView() {
-  stageEl.style.transform = `translate(-50%, -50%) translate(${view.x}px, ${view.y}px) scale(${view.z})`;
-  $('zoomPct').textContent = Math.round(view.z * 100) + '%';
-  rectC = null; drawUI();
+function clampView() {                                 // keep part of the canvas on screen
+  const r = vp.getBoundingClientRect(), w = stageEl.offsetWidth * view.z, h = stageEl.offsetHeight * view.z;
+  const mx = Math.max(0, (r.width + w) / 2 - 80), my = Math.max(0, (r.height + h) / 2 - 80);
+  view.x = Math.max(-mx, Math.min(mx, view.x)); view.y = Math.max(-my, Math.min(my, view.y));
+}
+let viewRaf = 0;
+function applyView() {                                 // at most one transform write per screen refresh
+  clampView();
+  if (viewRaf) return;
+  viewRaf = requestAnimationFrame(() => {
+    viewRaf = 0;
+    stageEl.style.transform = `translate(-50%, -50%) translate(${view.x}px, ${view.y}px) scale(${view.z})`;
+    $('zoomPct').textContent = Math.round(view.z * 100) + '%';
+    rectC = null; drawUI();
+  });
 }
 function zoomAt(cx, cy, f) {
   const r = vp.getBoundingClientRect(), vx = cx - r.left - r.width / 2, vy = cy - r.top - r.height / 2;
-  const nz = Math.max(0.25, Math.min(8, view.z * f)), k = nz / view.z;
+  const nz = Math.max(0.5, Math.min(10, view.z * f)), k = nz / view.z;
   view.x = vx - (vx - view.x) * k; view.y = vy - (vy - view.y) * k; view.z = nz;
   applyView();
 }
@@ -366,7 +388,7 @@ vp.addEventListener('pointermove', e => {
   if (!pinch || pts.size !== 2) return;
   const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
   const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
-  const nz = Math.max(0.25, Math.min(8, pinch.v.z * d / pinch.d)), k = nz / pinch.v.z;
+  const nz = Math.max(0.5, Math.min(10, pinch.v.z * d / pinch.d)), k = nz / pinch.v.z;
   const vx = pinch.mx - pinch.r.left - pinch.r.width / 2, vy = pinch.my - pinch.r.top - pinch.r.height / 2;
   view.z = nz; view.x = vx - (vx - pinch.v.x) * k + mx - pinch.mx; view.y = vy - (vy - pinch.v.y) * k + my - pinch.my;
   applyView();
@@ -483,7 +505,12 @@ function drawUI() {
     for (const [kind, x, y] of handlePts()) dot([x, y], kind === 'rot' ? '#ff6b6b' : '#fff');
   }
 }
-window.addEventListener('resize', () => { rectC = null; drawUI(); });   // also fires when the phone is rotated
+let wasPortrait = matchMedia('(orientation: portrait)').matches;
+window.addEventListener('resize', () => {
+  const p = matchMedia('(orientation: portrait)').matches;
+  if (p !== wasPortrait) { wasPortrait = p; view = { z: 1, x: 0, y: 0 }; }   // re-fit after rotating the phone
+  applyView();
+});   // also fires when the phone is rotated
 
 draw.addEventListener('pointerdown', e => {
   if (!e.isPrimary || playing || pinch) return;
@@ -547,9 +574,9 @@ const endPointer = e => {
   if (drag) {
     const it = sel, o = drag.o;
     drag = null;
-    if (Object.keys(o).some(k => it[k] !== o[k])) { hist.push(() => Object.assign(it, o)); renderStrip(); queueSave(); }
+    if (Object.keys(o).some(k => it[k] !== o[k])) { hist.push(() => Object.assign(it, o)); updateThumb(cur); queueSave(); }
   } else if (stroke) {
-    stroke = null; live = null; renderStrip(); render(); queueSave();
+    stroke = null; live = null; updateThumb(cur); render(); queueSave();
   } else if (bend && tool === 'bend') {
     if (bend.phase === 'lasso') bendClose();
     else if (bend.phase === 'goal' && bend.goal) bendCommit();
@@ -596,6 +623,9 @@ function setPlay(on) {
   playing = on;
   $('play').textContent = on ? 'Stop' : 'Play';
   $('play').classList.toggle('playing', on);
+  if (vid.src && !vid.hidden) {
+    if (on) { vid.currentTime = Math.max(0, vidOffset + cur / fps); vid.play().catch(() => {}); } else vid.pause();
+  }
   clearInterval(timer);
   if (on) timer = setInterval(() => { cur = (cur + 1) % proj.frames.length; render(); }, 1000 / fps);
   render();
@@ -804,7 +834,7 @@ $('export').onclick = async () => {
   out.width = W; out.height = H;
   const x = out.getContext('2d');
   const rec = new MediaRecorder(out.captureStream(fps), { mimeType: type, videoBitsPerSecond: 6e6 });
-  const chunks = [], keep = cur, msg = $('exportOut');
+  const chunks = [], keep = cur, msg = $('exportOut'), withVid = $('vidExport').checked && !vid.hidden && vid.videoWidth > 0;
   rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
   const stopped = new Promise(r => { rec.onstop = r; });
   playing = true; sel = null;                          // playing = true locks editing while recording
@@ -814,7 +844,12 @@ $('export').onclick = async () => {
     for (let i = 0; i < proj.frames.length; i++) {
       cur = i; msg.textContent = `Recording ${i + 1} / ${proj.frames.length}`;
       paintFrame(); await nextPaint(); await nextPaint();
+      if (withVid) await seekVid(vidOffset + i / fps);
       x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+      if (withVid) {                                   // video under the drawing, fitted like on screen
+        const s = Math.min(W / vid.videoWidth, H / vid.videoHeight), vw = vid.videoWidth * s, vh = vid.videoHeight * s;
+        x.drawImage(vid, (W - vw) / 2, (H - vh) / 2, vw, vh);
+      }
       x.drawImage(fxMode ? fxc : draw, 0, 0);          // includes the active shader
       await wait(1000 / fps);
     }
@@ -847,6 +882,59 @@ $('export').onclick = async () => {
     $('export').disabled = $('play').disabled = false;
     render();
   }
+};
+
+// ---------- collapsing panels ----------
+const ed = $('editor');
+const isCompact = () => matchMedia('(max-width: 900px), (max-height: 520px)').matches;   // phones and small windows
+function syncUI() {
+  $('uiMenu').classList.toggle('on', !ed.classList.contains('noMenu'));
+  $('uiTime').classList.toggle('on', !ed.classList.contains('noTime'));
+}
+$('uiMenu').onclick = () => { ed.classList.toggle('noMenu'); syncUI(); };
+$('uiTime').onclick = () => { ed.classList.toggle('noTime'); syncUI(); };
+$('uiFocus').onclick = () => ed.classList.add('focus');
+$('unfocus').onclick = () => ed.classList.remove('focus');
+$('zoomPct').onclick = () => { if (view.z > 1.05) view = { z: 1, x: 0, y: 0 }; else zoomMid(2 / view.z); applyView(); };
+new ResizeObserver(() => { rectC = null; if (proj) applyView(); }).observe(vp);   // panels opening / rotating changes the canvas area
+
+// ---------- video reference: scrub, play along, animate over it ----------
+const vid = $('vid');
+let vidOffset = 0;
+function syncVideo() {                                 // frame N shows the video at offset + N / fps
+  if (vid.hidden || !vid.src || !vid.duration) return;
+  const t = Math.max(0, Math.min(vidOffset + cur / fps, vid.duration));
+  if (playing) { if (Math.abs(vid.currentTime - t) > 0.3) vid.currentTime = t; }
+  else vid.currentTime = t;
+}
+function resetVideo() {
+  vid.pause(); vid.removeAttribute('src'); vid.load();
+  vid.hidden = true; vidOffset = 0; $('vidOff').value = 0;
+}
+const seekVid = t => new Promise(r => {
+  if (Math.abs(vid.currentTime - t) < 0.001) return r();
+  const done = () => { vid.removeEventListener('seeked', done); r(); };
+  vid.addEventListener('seeked', done);
+  vid.currentTime = Math.min(t, vid.duration || t);
+  setTimeout(r, 800);
+});
+$('vidFile').onchange = e => {
+  const f = e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  vid.onloadedmetadata = () => { syncVideo(); toast(`Video loaded (${vid.duration.toFixed(1)} s). It is not saved with the project.`); };
+  vid.src = URL.createObjectURL(f); vid.hidden = false;
+};
+$('vidAlpha').oninput = e => { vid.style.opacity = e.target.value; };
+$('vidOff').oninput = e => { vidOffset = +e.target.value || 0; syncVideo(); };
+$('vidDel').onclick = resetVideo;
+$('vidFrames').onclick = () => {                       // one blank frame per video frame, ready to draw over
+  if (vid.hidden || !vid.duration) { toast('Add a video first'); return; }
+  const n = Math.min(600, Math.ceil((vid.duration - vidOffset) * fps));
+  if (n <= proj.frames.length) { toast('You already have enough frames'); return; }
+  if (n > 200 && !confirm(`This adds frames up to ${n}. Continue?`)) return;
+  while (proj.frames.length < n) proj.frames.push([]);
+  refresh(); queueSave(); toast(`Now ${n} frames, one per video frame at ${fps} fps`);
 };
 
 // ---------- shaders (WebGL post-processing of the drawing) ----------
