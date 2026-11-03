@@ -80,16 +80,6 @@ h1 { margin: 0; font-size: 24px; letter-spacing: 1px; color: var(--red); }
 #viewport { grid-area: view; position: relative; overflow: hidden; container-type: size; background: #060303; touch-action: none; }
 #timeline { grid-area: time; display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 8px 10px; background: var(--p1); border-top: 1px solid var(--line); }
 
-@media (orientation: portrait) {
-  #work { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 130px 210px; grid-template-areas: "view" "time" "menu"; }
-  #menu { border-right: 0; border-top: 1px solid var(--line); }
-}
-@media (max-height: 520px) and (orientation: landscape) {
-  #work { grid-template-columns: 214px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 108px; }
-  .top { padding: 4px 10px; }
-  button { min-height: 32px; }
-  .fr canvas { height: 38px; }
-}
 
 /* ---------- canvas ---------- */
 #stage {
@@ -168,3 +158,32 @@ select { padding: 0 10px; text-align: left; }
 
 #exportOut { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 a.btn { color: inherit; text-decoration: none; }
+
+/* ---------- collapsing panels ---------- */
+#work { transition: grid-template-columns .3s var(--ease), grid-template-rows .3s var(--ease); }
+.noMenu #work, .focus #work { grid-template-columns: 0 minmax(0, 1fr); }
+.noTime #work, .focus #work { grid-template-rows: minmax(0, 1fr) 0; }
+.noMenu #menu, .focus #menu { overflow: hidden; visibility: hidden; border: 0; }
+.noTime #timeline, .focus #timeline { overflow: hidden; visibility: hidden; padding: 0; border: 0; }
+.focus .top { display: none; }
+#unfocus { display: none; position: absolute; left: 8px; bottom: 8px; z-index: 6; }
+.focus #unfocus { display: block; }
+#zoomPct { cursor: pointer; }
+#vid { object-fit: contain; opacity: .6; pointer-events: none; }
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--red); }
+#tabs button { font-size: 12px; padding: 0; }
+
+/* phones and small windows: the canvas fills the screen, panels float over it */
+@media (max-width: 900px), (max-height: 520px) {
+  #work { display: block; position: relative; }
+  #viewport { position: absolute; inset: 0; }
+  #menu { position: absolute; left: 0; top: 0; bottom: 0; z-index: 5; width: min(250px, 72vw); transition: transform .3s var(--ease); }
+  #timeline { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; transition: transform .3s var(--ease); }
+  .noMenu #menu, .focus #menu { visibility: visible; transform: translateX(-104%); }
+  .noTime #timeline, .focus #timeline { visibility: visible; transform: translateY(104%); padding: 8px 10px; border-top: 1px solid var(--line); }
+  .top { padding: 3px 8px; gap: 6px; }
+  .top button { min-height: 34px; padding: 0 9px; font-size: 13px; }
+  .fr canvas { height: 44px; }
+  #zoom { top: 8px; bottom: auto; flex-direction: column; }
+  #tip { max-width: calc(100% - 70px); }
+}
