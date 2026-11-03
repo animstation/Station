@@ -2,6 +2,12 @@
 // Project = { id, name, updated, fps, layers: [{ id, name, vis, fill? }], frames }
 // frames[i] = strokes [{ l: layerId, color, size, pts }]  (layers listed bottom to top)
 
+const showError = msg => {
+  const t = document.getElementById('toast');
+  if (t) { t.textContent = 'Error: ' + msg; t.classList.add('on'); }
+};
+window.addEventListener('error', e => showError(e.message));
+window.addEventListener('unhandledrejection', e => showError(e.reason && e.reason.message || 'something failed'));
 const $ = id => document.getElementById(id);
 const $$ = s => document.querySelectorAll(s);
 const el = (tag, cls) => { const e = document.createElement(tag); e.className = cls || ''; return e; };
@@ -602,12 +608,9 @@ $('fps').oninput = e => {
 };
 $('name').oninput = e => { proj.name = e.target.value.trim() || 'Untitled'; queueSave(); };
 
-// ---------- dock tabs ----------
+// ---------- menu tabs ----------
 $$('#tabs button').forEach(b => {
   b.onclick = () => {
-    const dock = $('dock');
-    if (b.classList.contains('on')) { dock.classList.toggle('min'); return; }   // tap the open tab to collapse
-    dock.classList.remove('min');
     $$('#tabs button').forEach(t => t.classList.toggle('on', t === b));
     $$('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + b.dataset.p));
   };
