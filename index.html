@@ -29,6 +29,7 @@
           <canvas id="onion"></canvas>
           <canvas id="draw"></canvas>
           <canvas id="fx"></canvas>
+          <canvas id="ui"></canvas>
         </div>
       </div>
 
@@ -38,6 +39,7 @@
           <button data-p="layers">Layers</button>
           <button data-p="tools">Tools</button>
           <button data-p="fx">Shaders</button>
+          <button data-p="project">Project</button>
         </nav>
 
         <div id="panels">
@@ -48,7 +50,10 @@
               <span id="label"></span>
               <button id="next" class="icon" aria-label="Next frame">›</button>
               <button id="add">+ Frame</button>
-              <button id="dup">Copy</button>
+              <button id="dup">Duplicate</button>
+              <button id="fCopy">Copy frame</button>
+              <button id="fPaste">Paste frame</button>
+              <button id="fromLast">From last</button>
               <button id="del">Delete</button>
               <button id="clear">Clear</button>
               <button id="onionBtn" class="on">Onion</button>
@@ -61,6 +66,9 @@
             <div class="row tools">
               <button id="addL">+ Layer</button>
               <button id="addF">+ Fill layer</button>
+              <button id="lDup">Duplicate</button>
+              <button id="lCopy">Copy art</button>
+              <button id="lPaste">Paste art</button>
               <button id="lUp">Up</button>
               <button id="lDn">Down</button>
               <button id="lDel">Delete</button>
@@ -70,7 +78,9 @@
           <div class="panel" id="p-tools">
             <div class="row tools">
               <button id="tBrush" class="on">Brush</button>
+              <button id="tErase">Erase</button>
               <button id="tSwap">Color swap</button>
+              <button id="tMove">Move</button>
               <input type="color" id="color" value="#000000" aria-label="Color">
               <input type="range" id="size" min="2" max="30" value="6" aria-label="Brush size">
             </div>
@@ -79,6 +89,10 @@
               <label class="btn">Ref image<input type="file" id="refFile" accept="image/*"></label>
               <input type="range" id="refAlpha" min="0.05" max="1" step="0.05" value="0.4" aria-label="Reference opacity">
             </div>
+            <div class="row tools">
+              <label class="btn">Add image<input type="file" id="imgFile" accept="image/*"></label>
+              <button id="imgDel">Delete image</button>
+            </div>
             <small id="hint"></small>
           </div>
 
@@ -86,6 +100,21 @@
             <div class="row tools" id="fxList"></div>
             <label class="fps">Intensity<input type="range" id="fxK" min="0" max="1" step="0.05" value="0.5"></label>
             <small id="fxHint">Shaders preview the final look. The reference image and onion skin are hidden while one is on.</small>
+          </div>
+
+          <div class="panel" id="p-project">
+            <div class="row tools">
+              <label class="fps">Season<input type="number" id="season" min="1" max="99" value="1"></label>
+              <label class="fps">Episode<input type="number" id="episode" min="1" max="999" value="1"></label>
+              <select id="status" aria-label="Status"><option>Planned</option><option>In progress</option><option>Done</option></select>
+            </div>
+            <div class="row tools" id="ratios"></div>
+            <div class="row tools">
+              <label class="fps">Custom ratio<input type="number" id="rw" min="1" value="9"></label>:
+              <input type="number" id="rh" min="1" value="16" aria-label="Height part">
+              <button id="setRatio">Set</button>
+            </div>
+            <div class="row tools"><button id="export" class="primary">Export video</button><span id="exportOut"></span></div>
           </div>
         </div>
       </aside>
